@@ -27,6 +27,24 @@ export async function ensureSchema() {
   return schemaReady;
 }
 
+export async function traceDb<T>(label: string, action: () => Promise<T>) {
+  const started = Date.now();
+
+  try {
+    const result = await action();
+    if (process.env.DEBUG_DB === "1") {
+      const count = Array.isArray(result) ? ` rows=${result.length}` : "";
+      console.log(`[db] ${label} ok ${Date.now() - started}ms${count}`);
+    }
+    return result;
+  } catch (error) {
+    if (process.env.DEBUG_DB === "1") {
+      console.error(`[db] ${label} failed ${Date.now() - started}ms`, error);
+    }
+    throw error;
+  }
+}
+
 async function createSchema() {
   const sql = getSql();
 
@@ -54,6 +72,14 @@ async function createSchema() {
     create table if not exists app_settings (
       key text primary key,
       value jsonb not null,
+      updated_at timestamptz not null default now()
+    )
+  `;
+
+  await sql`
+    create table if not exists forced_next_messages (
+      period text primary key check (period in ('morning', 'night')),
+      message_id bigint not null references messages(id) on delete cascade,
       updated_at timestamptz not null default now()
     )
   `;

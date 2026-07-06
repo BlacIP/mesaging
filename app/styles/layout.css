@@ -3,7 +3,6 @@
   margin: 0 auto;
   padding: 36px 0 56px;
 }
-
 .hero {
   display: flex;
   justify-content: space-between;
@@ -37,19 +36,13 @@
   align-items: center;
 }
 
-.hero-actions button,
-.panel-heading button,
-.link-button,
-.secondary-button {
+.hero-actions button, .panel-heading button, .link-button, .secondary-button {
   border: 1px solid var(--border);
   background: white;
   color: var(--accent);
 }
 
-.hero-actions button:hover,
-.panel-heading button:hover,
-.link-button:hover,
-.secondary-button:hover {
+.hero-actions button:hover, .panel-heading button:hover, .link-button:hover, .secondary-button:hover {
   border-color: var(--accent);
   background: white;
 }
@@ -103,6 +96,10 @@
   flex: 0 0 auto;
 }
 
+.bank .panel-heading {
+  margin-bottom: 1rem;
+}
+
 .bank-actions {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
@@ -118,14 +115,11 @@
     flex-direction: column;
   }
 
-  .messages-grid,
-  .form-grid,
-  .bank-actions {
+  .messages-grid, .form-grid, .bank-actions {
     grid-template-columns: 1fr;
   }
 
-  .hero-actions,
-  .bank-toolbar {
+  .hero-actions, .bank-toolbar {
     align-items: stretch;
     flex-direction: column;
   }

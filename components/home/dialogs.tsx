@@ -1,7 +1,9 @@
 "use client";
 
 import { AppConfig, Period } from "@/lib/types";
-import { formatPeriod } from "@/components/shared/client-data";
+import { AiAssist } from "@/components/shared/ai-assist";
+import { applyName, formatPeriod } from "@/components/shared/client-data";
+import { useState } from "react";
 
 export function SettingsSavedDialog({ config, onClose }: { config: AppConfig; onClose: () => void }) {
   return (
@@ -22,12 +24,31 @@ export function SettingsSavedDialog({ config, onClose }: { config: AppConfig; on
 }
 
 export function PreviewDialog({
+  herName,
   message,
-  onClose
+  onClose,
+  onSave
 }: {
-  message: { period: Period; message: string };
+  herName: string;
+  message: { id: number; period: Period; body: string };
   onClose: () => void;
+  onSave: (id: number, text: string) => Promise<void>;
 }) {
+  const [draft, setDraft] = useState(message.body);
+  const [editing, setEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  async function saveEdit() {
+    setIsSaving(true);
+    try {
+      await onSave(message.id, draft);
+    } catch {
+      // The page-level notice shows the save error.
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
   return (
     <div className="modal-backdrop" role="presentation" onClick={onClose}>
       <section
@@ -44,8 +65,27 @@ export function PreviewDialog({
           </div>
           <button type="button" onClick={onClose}>Close</button>
         </div>
-        <div className={`message-full ${message.period}`}>{message.message}</div>
+        {editing ? (
+          <div className="textarea-shell editor-shell">
+            <textarea className="message-editor" value={draft} onChange={(event) => setDraft(event.target.value)} />
+            <AiAssist draft={draft} herName={herName} period={message.period} onUse={setDraft} />
+          </div>
+        ) : (
+          <div className={`message-full ${message.period}`}>{applyName(draft, herName)}</div>
+        )}
         <p className="message-meta">This preview does not mark the message as sent.</p>
+        <div className="modal-actions">
+          {editing ? (
+            <>
+              <button disabled={isSaving} type="button" onClick={() => { setDraft(message.body); setEditing(false); }}>Cancel</button>
+              <button disabled={isSaving} type="button" onClick={() => void saveEdit()}>
+                {isSaving ? "Saving edit..." : "Save edit"}
+              </button>
+            </>
+          ) : (
+            <button type="button" onClick={() => setEditing(true)}>Edit preview</button>
+          )}
+        </div>
       </section>
     </div>
   );

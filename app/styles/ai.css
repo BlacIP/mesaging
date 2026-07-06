@@ -1,0 +1,107 @@
+.ai-popover {
+  position: absolute;
+  right: 0;
+  top: 2.75rem;
+  z-index: 20;
+  width: min(360px, calc(100vw - 48px));
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: white;
+  box-shadow: 0 16px 40px rgba(58, 34, 48, 0.18);
+  padding: 0.8rem;
+}
+
+.ai-popover-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.ai-popover-head button {
+  display: inline-flex;
+  width: 30px;
+  min-height: 28px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  background: white;
+  color: var(--accent);
+  padding: 0;
+}
+
+.ai-option-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+  margin-bottom: 0.55rem;
+}
+
+.ai-option-row span {
+  width: 54px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.ai-option-row button {
+  min-height: 30px;
+  border: 1px solid var(--border);
+  background: white;
+  color: var(--muted);
+  font-size: 0.78rem;
+  padding: 0 0.55rem;
+  text-transform: capitalize;
+}
+
+.ai-option-row button.active,
+.ai-generate {
+  background: var(--accent);
+  color: white;
+}
+
+.ai-generate {
+  width: 100%;
+  margin-top: 0.55rem;
+}
+
+.clear-suggestions {
+  width: 100%;
+  min-height: 32px;
+  border: 1px solid var(--border);
+  background: white;
+  color: var(--muted);
+  margin-top: 0.45rem;
+}
+
+.suggestion-list.compact {
+  max-height: 220px;
+  overflow: auto;
+}
+
+.suggestion-option {
+  width: 100%;
+  min-height: auto;
+  border: 1px solid var(--border);
+  background: var(--surface-soft);
+  color: var(--text);
+  line-height: 1.4;
+  margin-top: 0.5rem;
+  padding: 0.65rem;
+  text-align: left;
+}
+
+@media (max-width: 860px) {
+  .ai-popover {
+    position: absolute;
+    top: 2.7rem;
+    right: -0.65rem;
+    left: auto;
+    width: min(340px, calc(100vw - 24px));
+    max-height: min(420px, calc(100dvh - 160px));
+    overflow: auto;
+    transform: none;
+  }
+}

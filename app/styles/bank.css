@@ -116,20 +116,6 @@
   color: #475569;
 }
 
-.table-action {
-  min-height: 32px;
-  border: 1px solid var(--border);
-  background: white;
-  color: var(--accent);
-  font-size: 0.82rem;
-  padding: 0 0.75rem;
-}
-
-.table-action:hover {
-  border-color: var(--accent);
-  background: white;
-}
-
 .empty-table {
   color: var(--muted);
   text-align: center;

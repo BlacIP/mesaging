@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { api, readBankCache, readableError, writeBankCache } from "@/components/shared/client-data";
+import { MobileActions } from "@/components/shared/mobile-actions";
 import { BankMessage } from "@/lib/types";
 import { FilterToolbar } from "./filter-toolbar";
 import { BankMessageDialog } from "./message-dialog";
@@ -14,7 +15,7 @@ export function BankPage() {
   const [config, setConfig] = useState<BankConfig>({ her_name: "My Love" });
   const [period, setPeriod] = useState<PeriodFilter>("all");
   const [status, setStatus] = useState<StatusFilter>("all");
-  const [selected, setSelected] = useState<BankMessage | null>(null);
+  const [selected, setSelected] = useState<{ editing: boolean; message: BankMessage } | null>(null);
   const [notice, setNotice] = useState("Loading bank...");
 
   useEffect(() => {
@@ -52,14 +53,57 @@ export function BankPage() {
     }
   }
 
+  async function saveMessage(id: number, text: string) {
+    try {
+      const data = await api<{ messages: BankMessage[] }>("/api/messages", {
+        method: "POST",
+        body: JSON.stringify({ action: "edit", id, text })
+      });
+      setMessages(data.messages);
+      writeBankCache(data.messages, config);
+      const updated = data.messages.find((message) => message.id === id);
+      setSelected(updated ? { editing: false, message: updated } : null);
+      setNotice(`Showing ${data.messages.length} active messages`);
+    } catch (error) {
+      setNotice(readableError(error, "Could not save message"));
+      throw error;
+    }
+  }
+
+  async function forceNext(message: BankMessage) {
+    try {
+      const data = await api<{ messages: BankMessage[] }>("/api/messages", {
+        method: "POST",
+        body: JSON.stringify({ action: "force_next", id: message.id })
+      });
+      setMessages(data.messages);
+      writeBankCache(data.messages, config);
+      setNotice(`${message.period} message #${message.id} will send next`);
+    } catch (error) {
+      setNotice(readableError(error, "Could not set next message"));
+    }
+  }
+
   return (
     <main className="shell">
       <Hero onRefresh={() => void loadBank()} />
       {notice.startsWith("Could not") && <p className="notice" role="alert">{notice}</p>}
       <FilterToolbar counts={counts} period={period} status={status} onPeriod={setPeriod} onStatus={setStatus} />
-      <MessageTable herName={config.her_name} messages={filtered} onOpen={setSelected} />
+      <MessageTable
+        herName={config.her_name}
+        messages={filtered}
+        onEdit={(message) => setSelected({ editing: true, message })}
+        onForceNext={forceNext}
+        onOpen={(message) => setSelected({ editing: false, message })}
+      />
       {selected && (
-        <BankMessageDialog herName={config.her_name} message={selected} onClose={() => setSelected(null)} />
+        <BankMessageDialog
+          herName={config.her_name}
+          initialEditing={selected.editing}
+          message={selected.message}
+          onClose={() => setSelected(null)}
+          onSave={saveMessage}
+        />
       )}
     </main>
   );
@@ -70,12 +114,12 @@ function Hero({ onRefresh }: { onRefresh: () => void }) {
     <section className="hero bank-hero">
       <div>
         <h1>Message Bank</h1>
-        <p>Review every active message and filter by period or current send status.</p>
       </div>
       <div className="hero-actions">
         <Link className="link-button" href="/">Manage messages</Link>
         <button type="button" onClick={onRefresh}>Refresh</button>
       </div>
+      <MobileActions items={[{ href: "/", label: "Manage messages" }, { label: "Refresh", onClick: onRefresh }]} />
     </section>
   );
 }

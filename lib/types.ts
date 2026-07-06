@@ -11,6 +11,7 @@ export type Message = {
 
 export type BankMessage = Message & {
   created_at: string;
+  forced_next: boolean;
   send_count: number;
   last_sent_at: string | null;
   sent: boolean;

@@ -3,6 +3,8 @@
 require("node:dns").setDefaultResultOrder("ipv4first");
 
 /** @type {import('next').NextConfig} */
-const nextConfig = {};
+const nextConfig = {
+  allowedDevOrigins: ["192.168.1.186"]
+};
 
 module.exports = nextConfig;

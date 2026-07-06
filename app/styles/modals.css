@@ -73,3 +73,20 @@
   padding: 1.25rem;
   white-space: pre-wrap;
 }
+
+.message-editor {
+  min-height: 180px;
+  margin: 0;
+}
+
+.editor-shell {
+  margin: 1.25rem 0 1rem;
+}
+
+.modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
