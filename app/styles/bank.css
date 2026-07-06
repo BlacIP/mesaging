@@ -1,0 +1,136 @@
+.bank-toolbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  border: 1px solid rgba(240, 212, 223, 0.9);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: var(--shadow);
+  margin-bottom: 18px;
+  padding: 1rem;
+}
+
+.filter-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.filter-group > span {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 800;
+  margin-right: 0.25rem;
+}
+
+.filter-button {
+  min-height: 36px;
+  border: 1px solid var(--border);
+  background: white;
+  color: var(--muted);
+  font-size: 0.84rem;
+  padding: 0 0.8rem;
+}
+
+.filter-button:hover,
+.filter-button.active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: white;
+}
+
+.table-wrap {
+  overflow: auto;
+  border: 1px solid rgba(240, 212, 223, 0.9);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: var(--shadow);
+}
+
+.bank-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 980px;
+}
+
+.bank-table th,
+.bank-table td {
+  border-bottom: 1px solid var(--border);
+  padding: 0.85rem 0.9rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.bank-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: white;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.bank-table td {
+  color: var(--text);
+  font-size: 0.92rem;
+}
+
+.message-cell {
+  max-width: 470px;
+  line-height: 1.45;
+}
+
+.period-pill,
+.status-pill {
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 0 0.7rem;
+  text-transform: capitalize;
+}
+
+.period-pill.morning {
+  background: var(--surface-soft);
+  color: var(--accent);
+}
+
+.period-pill.night {
+  background: var(--surface-cool);
+  color: #314a9d;
+}
+
+.status-pill.sent {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-pill.unsent {
+  background: #f8fafc;
+  color: #475569;
+}
+
+.table-action {
+  min-height: 32px;
+  border: 1px solid var(--border);
+  background: white;
+  color: var(--accent);
+  font-size: 0.82rem;
+  padding: 0 0.75rem;
+}
+
+.table-action:hover {
+  border-color: var(--accent);
+  background: white;
+}
+
+.empty-table {
+  color: var(--muted);
+  text-align: center;
+}

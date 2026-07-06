@@ -1,0 +1,75 @@
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  background: rgba(58, 34, 48, 0.38);
+  padding: 1rem;
+}
+
+.message-modal,
+.save-modal {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: white;
+  box-shadow: 0 24px 80px rgba(58, 34, 48, 0.26);
+}
+
+.message-modal {
+  width: min(620px, 100%);
+  padding: 1.25rem;
+}
+
+.save-modal {
+  width: min(420px, 100%);
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.save-modal h2 {
+  margin: 0;
+}
+
+.save-modal p {
+  margin: 0.75rem 0 1.25rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.modal-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.modal-heading p,
+.message-meta {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.modal-heading h2 {
+  margin: 0.25rem 0 0;
+}
+
+.modal-heading button {
+  min-height: 36px;
+  border: 1px solid var(--border);
+  background: white;
+  color: var(--accent);
+}
+
+.message-full {
+  margin: 1.25rem 0 1rem;
+  border-radius: 8px;
+  background: var(--surface-soft);
+  color: var(--text);
+  font-size: clamp(1.15rem, 2vw, 1.45rem);
+  line-height: 1.55;
+  padding: 1.25rem;
+  white-space: pre-wrap;
+}

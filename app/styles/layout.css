@@ -1,0 +1,132 @@
+.shell {
+  width: min(1120px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 36px 0 56px;
+}
+
+.hero {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-end;
+  margin-bottom: 22px;
+}
+
+.hero h1,
+.panel h2 {
+  margin: 0;
+}
+
+.hero h1 {
+  color: var(--accent);
+  font-size: clamp(2.15rem, 6vw, 4.6rem);
+  line-height: 0.95;
+}
+
+.hero p,
+.panel p {
+  margin: 0.55rem 0 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.hero-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.hero-actions button,
+.panel-heading button,
+.link-button,
+.secondary-button {
+  border: 1px solid var(--border);
+  background: white;
+  color: var(--accent);
+}
+
+.hero-actions button:hover,
+.panel-heading button:hover,
+.link-button:hover,
+.secondary-button:hover {
+  border-color: var(--accent);
+  background: white;
+}
+
+.link-button {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.92rem;
+  font-weight: 700;
+  padding: 0 1rem;
+  text-decoration: none;
+}
+
+.notice {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: white;
+  color: var(--muted);
+  font-size: 0.92rem;
+  font-weight: 700;
+  margin: -8px 0 18px;
+  padding: 0.85rem 1rem;
+}
+
+.panel {
+  border: 1px solid rgba(240, 212, 223, 0.9);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: var(--shadow);
+  padding: 1.25rem;
+}
+
+.messages-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.panel-heading {
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.panel-heading button {
+  flex: 0 0 auto;
+}
+
+.bank-actions {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: center;
+  margin-top: 0.75rem;
+}
+
+@media (max-width: 860px) {
+  .hero,
+  .panel-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .messages-grid,
+  .form-grid,
+  .bank-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-actions,
+  .bank-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
