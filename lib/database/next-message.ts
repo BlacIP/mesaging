@@ -3,6 +3,7 @@ import { ensureSchema, getSql, traceDb } from "./client";
 import { getConfig } from "./config";
 
 type NextMessage = {
+  body: string;
   id: number;
   period: Period;
   message: string;
@@ -48,19 +49,34 @@ export async function forceNextMessage(id: number) {
 }
 
 async function findNextMessage(period: Period, options: { resetWhenExhausted: boolean }): Promise<NextMessage | null> {
-  const message = await findForced(period) ?? await findUnsent(period) ?? await findAfterExhaustion(period, options.resetWhenExhausted);
+  const message = await findForced(period, options.resetWhenExhausted)
+    ?? await findUnsent(period)
+    ?? await findAfterExhaustion(period, options.resetWhenExhausted);
   if (!message) return null;
 
   const config = await getConfig();
   return {
+    body: message.body,
     id: message.id,
     period,
     message: message.body.replaceAll("{name}", config.her_name || "my love")
   };
 }
 
-async function findForced(period: Period) {
-  const rows = await traceDb("next.find_forced", () => getSql()`
+async function findForced(period: Period, consume: boolean) {
+  if (!consume) {
+    const previewRows = await traceDb("next.preview_forced", () => getSql()`
+      select m.id, m.period, m.body, m.active, m.created_at
+      from forced_next_messages f
+      join messages m on m.id = f.message_id
+      where f.period = ${period}
+        and m.active = true
+    `);
+
+    return (previewRows as Message[])[0] ?? null;
+  }
+
+  const rows = await traceDb("next.consume_forced", () => getSql()`
     with forced as (
       delete from forced_next_messages
       where period = ${period}
@@ -82,7 +98,7 @@ async function findUnsent(period: Period) {
     where m.period = ${period}
       and m.active = true
       and not exists (select 1 from message_sends s where s.message_id = m.id)
-    order by random()
+    order by m.created_at asc, m.id asc
     limit 1
   `);
 
@@ -108,7 +124,7 @@ async function findAfterExhaustion(period: Period, resetWhenExhausted: boolean) 
     from messages
     where period = ${period}
       and active = true
-    order by random()
+    order by created_at asc, id asc
     limit 1
   `);
 

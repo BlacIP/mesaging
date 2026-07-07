@@ -1,18 +1,21 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { api, applyName, readableError, writeBankCache } from "@/components/shared/client-data";
-import { MobileActions } from "@/components/shared/mobile-actions";
+import { api, readableError, writeBankCache } from "@/components/shared/client-data";
 import { AppConfig, Message, Period, emptyConfig } from "@/lib/types";
 import { PreviewDialog } from "./dialogs";
+import { Hero } from "./hero";
 import { MessageBank } from "./message-bank";
+
+type PreviewMessage = { body: string; id: number; message: string; period: Period };
 
 export function HomePage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [config, setConfig] = useState<AppConfig>(emptyConfig);
   const [newMessage, setNewMessage] = useState<Record<Period, string>>({ morning: "", night: "" });
   const [addingPeriod, setAddingPeriod] = useState<Period | null>(null);
+  const [previewingPeriod, setPreviewingPeriod] = useState<Period | null>(null);
+  const [previewCache, setPreviewCache] = useState<Record<Period, PreviewMessage | null>>({ morning: null, night: null });
   const [preview, setPreview] = useState<{ id: number; period: Period; body: string } | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -27,10 +30,11 @@ export function HomePage() {
 
   async function loadData() {
     try {
-      const data = await api<{ messages: Message[]; config: AppConfig }>("/api/data");
+      const data = await api<{ config: AppConfig; messages: Message[]; previews: Record<Period, PreviewMessage | null> }>("/api/data");
       const nextConfig = { ...emptyConfig, ...data.config };
       setMessages(data.messages);
       setConfig(nextConfig);
+      setPreviewCache(data.previews);
       writeBankCache(data.messages, nextConfig);
       setNotice(null);
     } catch (error) {
@@ -58,6 +62,7 @@ export function HomePage() {
       });
       setMessages(data.messages);
       writeBankCache(data.messages, config);
+      void refreshPreview(period);
       setNotice(null);
       return true;
     } catch (error) {
@@ -67,6 +72,7 @@ export function HomePage() {
   }
 
   async function saveMessage(id: number, text: string) {
+    const period = preview?.period;
     try {
       const data = await api<{ messages: Message[] }>("/api/messages", {
         method: "POST",
@@ -75,6 +81,7 @@ export function HomePage() {
       setMessages(data.messages);
       writeBankCache(data.messages, config);
       setPreview(null);
+      if (period) void refreshPreview(period);
       setNotice(null);
     } catch (error) {
       setNotice(readableError(error, "Could not save previewed message"));
@@ -82,15 +89,29 @@ export function HomePage() {
     }
   }
 
-  function previewNext(period: Period) {
-    const periodMessages = grouped[period];
-    if (periodMessages.length === 0) return setNotice(`No ${period} messages in the bank yet.`);
+  async function previewNext(period: Period) {
+    const cached = previewCache[period];
+    if (cached) {
+      setNotice(null);
+      setPreview({ id: cached.id, period: cached.period, body: cached.body });
+      return;
+    }
+    await refreshPreview(period, true);
+  }
 
-    const unsent = periodMessages.filter((message) => !message.sent);
-    const pool = unsent.length > 0 ? unsent : periodMessages;
-    const message = pool[Math.floor(Math.random() * pool.length)];
-    setNotice(null);
-    setPreview({ id: message.id, period, body: message.body });
+  async function refreshPreview(period: Period, openAfter = false) {
+    setPreviewingPeriod(period);
+    try {
+      const data = await api<PreviewMessage>(`/api/preview?period=${period}`);
+      setPreviewCache((current) => ({ ...current, [period]: data }));
+      setNotice(null);
+      if (openAfter) setPreview({ id: data.id, period: data.period, body: data.body });
+    } catch (error) {
+      setPreviewCache((current) => ({ ...current, [period]: null }));
+      setNotice(readableError(error, `No ${period} messages in the bank yet.`));
+    } finally {
+      setPreviewingPeriod(null);
+    }
   }
 
   return (
@@ -102,6 +123,7 @@ export function HomePage() {
           <MessageBank
             count={grouped[period].length}
             herName={config.her_name}
+            isPreviewing={previewingPeriod === period}
             key={period}
             newValue={newMessage[period]}
             period={period}
@@ -109,7 +131,7 @@ export function HomePage() {
             isAdding={addingPeriod === period}
             onAdd={add}
             onChange={(value) => setNewMessage((current) => ({ ...current, [period]: value }))}
-            onPreview={previewNext}
+            onPreview={(nextPeriod) => void previewNext(nextPeriod)}
           />
         ))}
       </section>
@@ -122,21 +144,5 @@ export function HomePage() {
         />
       )}
     </main>
-  );
-}
-
-function Hero({ total }: { total: number }) {
-  return (
-    <section className="hero">
-      <div>
-        <h1>Sweet Messages</h1>
-        <p>Manage {total} messages your iPhone Shortcuts can use for morning and night.</p>
-      </div>
-      <div className="hero-actions">
-        <Link className="link-button" href="/bank">View bank table</Link>
-        <Link className="link-button" href="/settings">Settings</Link>
-      </div>
-      <MobileActions items={[{ href: "/bank", label: "View bank table" }, { href: "/settings", label: "Settings" }]} />
-    </section>
   );
 }

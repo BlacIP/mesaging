@@ -116,6 +116,29 @@
   color: #475569;
 }
 
+.status-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.queue-pill {
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  border-radius: 999px;
+  background: #eef3ff;
+  color: #314a9d;
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 0 0.7rem;
+}
+
+.queue-pill.forced {
+  background: #fff1f6;
+  color: var(--accent);
+}
+
 .empty-table {
   color: var(--muted);
   text-align: center;

@@ -14,6 +14,8 @@ export type BankMessage = Message & {
   forced_next: boolean;
   send_count: number;
   last_sent_at: string | null;
+  next_reason: "forced" | "queued" | "cycle" | null;
+  queued_next: boolean;
   sent: boolean;
 };
 

@@ -7,6 +7,7 @@ type Props = {
   count: number;
   herName: string;
   isAdding: boolean;
+  isPreviewing: boolean;
   newValue: string;
   period: Period;
   title: string;
@@ -19,6 +20,7 @@ export function MessageBank({
   count,
   herName,
   isAdding,
+  isPreviewing,
   newValue,
   period,
   title,
@@ -32,8 +34,8 @@ export function MessageBank({
         <div>
           <h2>{title}</h2>
         </div>
-        <button type="button" disabled={count === 0} onClick={() => onPreview(period)}>
-          Preview next
+        <button type="button" disabled={count === 0 || isPreviewing} onClick={() => onPreview(period)}>
+          {isPreviewing ? "Previewing..." : "Preview next"}
         </button>
       </div>
 

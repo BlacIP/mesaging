@@ -37,7 +37,7 @@ export function MessageTable({ herName, messages, onEdit, onForceNext, onOpen }:
               <tr key={message.id}>
                 <td>#{message.id}</td>
                 <td><PeriodPill message={message} /></td>
-                <td><StatusPill message={message} /></td>
+                <td><StatusGroup message={message} /></td>
                 <td className="message-cell">{applyName(message.body, herName)}</td>
                 <td>{message.send_count}</td>
                 <td>{message.last_sent_at ? formatDate(message.last_sent_at) : "-"}</td>
@@ -58,7 +58,7 @@ export function MessageTable({ herName, messages, onEdit, onForceNext, onOpen }:
             <div className="mobile-card-head">
               <div>
                 <strong>#{message.id}</strong>
-                <div className="mobile-card-pills"><PeriodPill message={message} /><StatusPill message={message} /></div>
+                <div className="mobile-card-pills"><PeriodPill message={message} /><StatusGroup message={message} /></div>
               </div>
               <RowActions message={message} />
             </div>
@@ -107,6 +107,19 @@ function PeriodPill({ message }: { message: BankMessage }) {
 
 function StatusPill({ message }: { message: BankMessage }) {
   return <span className={message.sent ? "status-pill sent" : "status-pill unsent"}>{message.sent ? "Sent" : "Unsent"}</span>;
+}
+
+function StatusGroup({ message }: { message: BankMessage }) {
+  return (
+    <span className="status-group">
+      <StatusPill message={message} />
+      {message.queued_next && (
+        <span className={message.next_reason === "forced" ? "queue-pill forced" : "queue-pill"}>
+          {message.next_reason === "forced" ? "Forced next" : "Queued next"}
+        </span>
+      )}
+    </span>
+  );
 }
 
 export function formatDate(value: string) {
