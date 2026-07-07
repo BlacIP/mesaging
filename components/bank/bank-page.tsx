@@ -113,6 +113,7 @@ function Hero({ onRefresh }: { onRefresh: () => void }) {
   return (
     <section className="hero bank-hero">
       <div>
+        <p className="kicker">Sweet Messages</p>
         <h1>Message Bank</h1>
       </div>
       <div className="hero-actions">

@@ -16,7 +16,7 @@
   gap: 1rem;
   align-items: center;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 7px;
   background: var(--surface-soft);
   margin-top: 1rem;
   padding: 0.85rem 1rem;
@@ -24,13 +24,17 @@
 
 .settings-view span {
   color: var(--muted);
-  font-size: 0.82rem;
-  font-weight: 800;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .settings-view strong {
   color: var(--text);
-  font-size: 1rem;
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  font-weight: 500;
 }
 
 .form-grid {
@@ -41,13 +45,15 @@
 }
 
 .future-setting {
-  opacity: 0.48;
+  opacity: 0.55;
 }
 
 .future-setting span {
   color: var(--muted);
-  font-size: 0.72rem;
-  font-weight: 700;
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: none;
 }
 
 .ai-panel {
@@ -63,18 +69,17 @@
 
 select {
   border: 1px solid var(--border);
-  border-radius: 8px;
-  background: white;
+  border-radius: 7px;
+  background: var(--surface);
   color: var(--text);
   font: inherit;
-  min-height: 42px;
+  min-height: 40px;
   padding: 0 0.75rem;
 }
 
 .inline-notice {
   color: var(--muted);
   font-size: 0.88rem;
-  font-weight: 700;
 }
 
 .suggestion-list {
@@ -89,14 +94,14 @@ select {
   gap: 0.75rem;
   align-items: center;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 7px;
   background: var(--surface-soft);
   padding: 0.75rem;
 }
 
 .suggestion p {
   margin: 0;
-  line-height: 1.45;
+  line-height: 1.5;
 }
 
 @media (max-width: 860px) {
@@ -125,6 +130,6 @@ select {
   }
 
   .future-setting {
-    opacity: 0.58;
+    opacity: 0.62;
   }
 }

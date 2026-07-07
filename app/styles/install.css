@@ -9,9 +9,9 @@
   align-items: center;
   width: min(440px, calc(100vw - 2rem));
   border: 1px solid var(--border);
-  border-radius: 8px;
-  background: white;
-  box-shadow: 0 18px 50px rgba(58, 34, 48, 0.16);
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: var(--shadow-pop);
   padding: 0.9rem;
 }
 
@@ -20,12 +20,18 @@
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 1rem;
   align-items: center;
-  border: 1px solid rgba(240, 212, 223, 0.9);
-  border-radius: 8px;
-  background: white;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
   box-shadow: var(--shadow);
   margin-top: 18px;
   padding: 1rem;
+}
+
+.install-float strong,
+.install-panel strong {
+  font-family: var(--font-serif);
+  font-weight: 500;
 }
 
 .install-float p,
@@ -50,10 +56,15 @@
 .install-close {
   width: 38px;
   border: 1px solid var(--border);
-  background: white;
-  color: var(--accent);
+  background: var(--surface);
+  color: var(--muted);
   padding: 0;
   justify-content: center;
+}
+
+.install-close:hover {
+  background: var(--surface-soft);
+  color: var(--text);
 }
 
 .install-modal ol {
@@ -64,7 +75,7 @@
 .install-modal li {
   margin: 0.65rem 0;
   color: var(--muted);
-  line-height: 1.45;
+  line-height: 1.5;
 }
 
 @media (max-width: 860px) {

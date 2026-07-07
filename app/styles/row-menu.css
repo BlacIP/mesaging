@@ -18,14 +18,14 @@
   justify-content: center;
   border: 0;
   background: transparent;
-  color: var(--accent);
+  color: var(--muted);
   letter-spacing: 0;
   padding: 0;
 }
 
 .ellipsis-button:hover {
   background: transparent;
-  color: var(--accent-strong);
+  color: var(--text);
 }
 
 .row-menu-list {
@@ -37,8 +37,8 @@
   overflow: hidden;
   border: 1px solid var(--border);
   border-radius: 8px;
-  background: white;
-  box-shadow: 0 18px 40px rgba(63, 34, 49, 0.14);
+  background: var(--surface);
+  box-shadow: var(--shadow-pop);
 }
 
 .row-menu-list button {
@@ -49,9 +49,10 @@
   gap: 0.55rem;
   border: 0;
   border-radius: 0;
-  background: white;
+  background: var(--surface);
   color: var(--text);
   font-size: 0.86rem;
+  font-weight: 500;
   justify-content: flex-start;
   padding: 0 0.8rem;
   text-align: left;
@@ -59,7 +60,7 @@
 
 .row-menu-list button:hover {
   background: var(--surface-soft);
-  color: var(--accent);
+  color: var(--text);
 }
 
 .row-menu-list button:disabled {

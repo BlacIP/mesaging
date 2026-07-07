@@ -1,6 +1,14 @@
 import type { Metadata } from "next";
 import type { Viewport } from "next";
+import { Fraunces } from "next/font/google";
 import "./globals.css";
+
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+  weight: ["400", "500", "600"],
+  variable: "--font-display"
+});
 
 export const metadata: Metadata = {
   title: "Sweet Messages",
@@ -14,7 +22,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#fff8fb",
+  themeColor: "#f6f1e8",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1
@@ -26,7 +34,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={fraunces.variable}>
       <body>{children}</body>
     </html>
   );

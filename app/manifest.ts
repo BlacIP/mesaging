@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Private morning and night message bank.",
     start_url: "/",
     display: "standalone",
-    background_color: "#fff8fb",
-    theme_color: "#be185d",
+    background_color: "#f6f1e8",
+    theme_color: "#8a3344",
     icons: [
       {
         src: "/icon.svg",

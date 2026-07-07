@@ -5,8 +5,9 @@ export function Hero({ total }: { total: number }) {
   return (
     <section className="hero">
       <div>
+        <p className="kicker">Every morning &middot; every night</p>
         <h1>Sweet Messages</h1>
-        <p>Manage {total} messages your iPhone Shortcuts can use for morning and night.</p>
+        <p>{total} messages in the bank, ready for her mornings and nights.</p>
       </div>
       <div className="hero-actions">
         <Link className="link-button" href="/bank">View bank table</Link>

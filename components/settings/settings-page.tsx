@@ -54,6 +54,7 @@ export function SettingsPage() {
     <main className="shell">
       <section className="hero">
         <div>
+          <p className="kicker">Sweet Messages</p>
           <h1>Settings</h1>
           <p>Private configuration for name replacement and future sender options.</p>
         </div>

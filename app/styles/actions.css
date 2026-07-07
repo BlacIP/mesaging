@@ -8,10 +8,14 @@
   align-items: center;
   justify-content: center;
   border: 1px solid var(--border);
-  background: white;
-  color: var(--accent);
+  background: var(--surface);
+  color: var(--text);
   padding: 0;
   transform: translateY(-50%);
+}
+
+.copy-button:hover {
+  background: var(--surface-soft);
 }
 
 .endpoint-field {
@@ -33,8 +37,8 @@
   align-items: center;
   justify-content: center;
   border: 1px solid var(--border);
-  background: white;
-  color: var(--accent);
+  background: var(--surface);
+  color: var(--text);
   padding: 0 0.75rem;
 }
 
@@ -56,13 +60,14 @@
   position: static;
   border: 0;
   background: transparent;
+  color: var(--muted);
   font-size: 1rem;
   padding: 0 0.25rem;
 }
 
 .ai-button:hover {
   background: transparent;
-  color: var(--accent-strong);
+  color: var(--accent);
 }
 
 .inline-notice {
@@ -75,8 +80,9 @@
 .inline-notice button {
   min-height: 28px;
   border: 1px solid var(--border);
-  background: white;
-  color: var(--accent);
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 500;
   padding: 0 0.55rem;
 }
 
@@ -94,7 +100,7 @@
 .flow-panel li {
   margin: 0.55rem 0;
   color: var(--muted);
-  line-height: 1.45;
+  line-height: 1.5;
 }
 
 @media (max-width: 860px) {

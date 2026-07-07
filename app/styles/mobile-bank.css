@@ -28,8 +28,10 @@
 
   .mobile-filter-select > span {
     color: var(--muted);
-    font-size: 0.78rem;
-    font-weight: 900;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 
   .mobile-filter-select > button {
@@ -38,14 +40,15 @@
     align-items: center;
     justify-content: space-between;
     border: 1px solid var(--border);
-    background: white;
+    background: var(--surface);
     color: var(--text);
+    font-weight: 500;
     padding: 0 0.8rem;
   }
 
   .mobile-filter-select strong {
-    color: var(--accent);
-    font-size: 1rem;
+    color: var(--text);
+    font-size: 0.95rem;
   }
 
   .mobile-filter-menu {
@@ -57,8 +60,8 @@
     overflow: hidden;
     border: 1px solid var(--border);
     border-radius: 8px;
-    background: white;
-    box-shadow: 0 18px 40px rgba(63, 34, 49, 0.14);
+    background: var(--surface);
+    box-shadow: var(--shadow-pop);
   }
 
   .mobile-filter-menu button {
@@ -66,8 +69,9 @@
     min-height: 40px;
     border: 0;
     border-radius: 0;
-    background: white;
+    background: var(--surface);
     color: var(--text);
+    font-weight: 500;
     justify-content: flex-start;
     text-align: left;
   }
@@ -75,7 +79,7 @@
   .mobile-filter-menu button.active,
   .mobile-filter-menu button:hover {
     background: var(--surface-soft);
-    color: var(--accent);
+    color: var(--text);
   }
 
   .mobile-message-list {
@@ -85,9 +89,9 @@
 
   .mobile-message-card,
   .empty-card {
-    border: 1px solid rgba(240, 212, 223, 0.9);
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
     box-shadow: var(--shadow);
     padding: 1rem;
   }
@@ -107,7 +111,7 @@
 
   .mobile-message-card p {
     margin: 0.8rem 0;
-    line-height: 1.5;
+    line-height: 1.55;
   }
 
   .mobile-message-card small,
