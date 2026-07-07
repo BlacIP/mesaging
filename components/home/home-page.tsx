@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { api, readableError, writeBankCache } from "@/components/shared/client-data";
+import { InstallPrompt } from "@/components/shared/install-prompt";
 import { AppConfig, Message, Period, emptyConfig } from "@/lib/types";
 import { PreviewDialog } from "./dialogs";
 import { Hero } from "./hero";
@@ -116,6 +117,7 @@ export function HomePage() {
 
   return (
     <main className="shell">
+      <InstallPrompt variant="floating" />
       <Hero total={messages.length} />
       {notice && <p className="notice" role="alert">{notice}</p>}
       <section className="messages-grid">

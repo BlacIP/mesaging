@@ -1,0 +1,81 @@
+.install-float {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 19;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.9rem;
+  align-items: center;
+  width: min(440px, calc(100vw - 2rem));
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: white;
+  box-shadow: 0 18px 50px rgba(58, 34, 48, 0.16);
+  padding: 0.9rem;
+}
+
+.install-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: center;
+  border: 1px solid rgba(240, 212, 223, 0.9);
+  border-radius: 8px;
+  background: white;
+  box-shadow: var(--shadow);
+  margin-top: 18px;
+  padding: 1rem;
+}
+
+.install-float p,
+.install-panel p {
+  margin: 0.25rem 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.install-actions {
+  display: flex;
+  gap: 0.45rem;
+  align-items: center;
+}
+
+.install-actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.install-close {
+  width: 38px;
+  border: 1px solid var(--border);
+  background: white;
+  color: var(--accent);
+  padding: 0;
+  justify-content: center;
+}
+
+.install-modal ol {
+  margin: 1rem 0 0;
+  padding-left: 1.25rem;
+}
+
+.install-modal li {
+  margin: 0.65rem 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+@media (max-width: 860px) {
+  .install-float {
+    left: 1rem;
+    right: 1rem;
+    bottom: calc(88px + env(safe-area-inset-bottom));
+    grid-template-columns: 1fr;
+  }
+
+  .install-panel {
+    grid-template-columns: 1fr;
+  }
+}

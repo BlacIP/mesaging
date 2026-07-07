@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import { api, readableError, writeBankCache } from "@/components/shared/client-data";
 import { CopyButton } from "@/components/shared/copy-button";
+import { InstallPrompt } from "@/components/shared/install-prompt";
 import { MobileActions } from "@/components/shared/mobile-actions";
 import { SettingsForm } from "@/components/home/settings-form";
 import { SettingsSavedDialog } from "@/components/home/dialogs";
@@ -70,6 +71,7 @@ export function SettingsPage() {
         onEdit={() => setEditing(true)}
         onSave={saveSettings}
       />
+      <InstallPrompt variant="settings" />
       <ShortcutFlow baseUrl={baseUrl} />
       {saved && <SettingsSavedDialog config={config} onClose={() => setSaved(false)} />}
     </main>
