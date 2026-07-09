@@ -1,7 +1,7 @@
 "use client";
 
 import { AiAssist } from "@/components/shared/ai-assist";
-import { Period } from "@/lib/types";
+import { Message, Period } from "@/lib/types";
 
 type Props = {
   count: number;
@@ -12,6 +12,7 @@ type Props = {
   period: Period;
   title: string;
   onAdd: (period: Period) => Promise<void>;
+  onBankUpdated?: (messages: Message[]) => void;
   onChange: (value: string) => void;
   onPreview: (period: Period) => void;
 };
@@ -25,6 +26,7 @@ export function MessageBank({
   period,
   title,
   onAdd,
+  onBankUpdated,
   onChange,
   onPreview
 }: Props) {
@@ -45,7 +47,7 @@ export function MessageBank({
           onChange={(event) => onChange(event.target.value)}
           placeholder={`Write a new ${period} message. Use {name} where needed, shown as ${herName || "My Love"} in the UI.`}
         />
-        <AiAssist draft={newValue} herName={herName} period={period} onUse={onChange} />
+        <AiAssist draft={newValue} herName={herName} period={period} onBankUpdated={onBankUpdated} onUse={onChange} />
       </div>
 
       <div className="bank-actions">

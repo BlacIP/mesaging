@@ -85,6 +85,36 @@ async function createSchema() {
   `;
 
   await sql`
+    create table if not exists ai_generations (
+      id bigserial primary key,
+      period text not null check (period in ('morning', 'night')),
+      mode text not null default 'generate',
+      tone text not null default '',
+      length text not null default '',
+      focus text not null default '',
+      draft text not null default '',
+      created_at timestamptz not null default now()
+    )
+  `;
+
+  await sql`
+    create table if not exists ai_suggestions (
+      id bigserial primary key,
+      generation_id bigint not null references ai_generations(id) on delete cascade,
+      position int not null default 0,
+      body text not null,
+      used boolean not null default false,
+      added_message_id bigint references messages(id) on delete set null,
+      created_at timestamptz not null default now()
+    )
+  `;
+
+  await sql`
+    create index if not exists ai_suggestions_generation_idx
+    on ai_suggestions(generation_id)
+  `;
+
+  await sql`
     create index if not exists messages_period_active_idx
     on messages(period, active, id)
   `;

@@ -1,7 +1,8 @@
 "use client";
 
-import { api, readableError } from "@/components/shared/client-data";
-import { Period } from "@/lib/types";
+import Link from "next/link";
+import { api, formatPeriod, readableError } from "@/components/shared/client-data";
+import { Message, Period } from "@/lib/types";
 import { RiAiGenerate, RiCloseLine } from "@remixicon/react";
 import { useEffect, useState } from "react";
 
@@ -16,14 +17,23 @@ const loveLoadingLines = [
   "polishing the butterflies..."
 ];
 
+type Suggestion = {
+  id: number;
+  body: string;
+  saved: boolean;
+  saving: boolean;
+};
+
 export function AiAssist({
   draft,
   herName,
+  onBankUpdated,
   onUse,
   period
 }: {
   draft: string;
   herName: string;
+  onBankUpdated?: (messages: Message[]) => void;
   onUse: (message: string) => void;
   period: Period;
 }) {
@@ -34,7 +44,7 @@ export function AiAssist({
   const [isGenerating, setIsGenerating] = useState(false);
   const [loadingIndex, setLoadingIndex] = useState(0);
   const [notice, setNotice] = useState<string | null>(null);
-  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
 
   useEffect(() => {
     if (!isGenerating) return;
@@ -52,11 +62,11 @@ export function AiAssist({
     setNotice(null);
 
     try {
-      const data = await api<{ suggestions: string[] }>("/api/ai/messages", {
+      const data = await api<{ suggestions: { id: number; body: string }[] }>("/api/ai/messages", {
         method: "POST",
         body: JSON.stringify({ draft, focus, herName, length, mode: draft ? "edit" : "generate", period, tone })
       });
-      setSuggestions(data.suggestions);
+      setSuggestions(data.suggestions.map((s) => ({ ...s, saved: false, saving: false })));
       setNotice(null);
     } catch (error) {
       setNotice(readableError(error, "Could not generate messages"));
@@ -65,18 +75,54 @@ export function AiAssist({
     }
   }
 
+  function use(suggestion: Suggestion) {
+    onUse(suggestion.body);
+    setOpen(false);
+    if (suggestion.id > 0) {
+      void api("/api/ai/history", {
+        method: "POST",
+        body: JSON.stringify({ action: "mark_used", suggestionId: suggestion.id })
+      }).catch(() => undefined);
+    }
+  }
+
+  async function saveToBank(suggestion: Suggestion) {
+    if (suggestion.saved || suggestion.saving) return;
+    setSuggestions((current) => current.map((s) => (s.id === suggestion.id ? { ...s, saving: true } : s)));
+
+    try {
+      const data = await api<{ messages: Message[] }>("/api/ai/history", {
+        method: "POST",
+        body: JSON.stringify({ action: "add_to_bank", suggestionId: suggestion.id })
+      });
+      setSuggestions((current) => current.map((s) => (s.id === suggestion.id ? { ...s, saved: true, saving: false } : s)));
+      setNotice(null);
+      onBankUpdated?.(data.messages);
+    } catch (error) {
+      setSuggestions((current) => current.map((s) => (s.id === suggestion.id ? { ...s, saving: false } : s)));
+      setNotice(readableError(error, "Could not save to bank"));
+    }
+  }
+
   return (
     <span className="ai-anchor">
       <button className="icon-button ai-button" type="button" aria-label="AI assist" title="AI assist" onClick={() => setOpen(!open)}>
         <RiAiGenerate aria-hidden size={19} />
       </button>
+      {open && <div className="ai-backdrop" role="presentation" onClick={() => setOpen(false)} />}
       {open && (
-        <div className="ai-popover" role="menu" aria-label="AI assist options">
+        <div className="ai-popover" role="dialog" aria-label="AI assist options">
           <div className="ai-popover-head">
-            <strong>AI assist</strong>
-            <button type="button" aria-label="Close AI options" onClick={() => setOpen(false)}>
-              <RiCloseLine aria-hidden size={18} />
-            </button>
+            <span className="ai-head-title">
+              <strong>AI assist</strong>
+              <span className={`period-pill ${period}`}>{formatPeriod(period)}</span>
+            </span>
+            <span className="ai-head-actions">
+              <Link className="ai-history-link" href="/history">History</Link>
+              <button type="button" aria-label="Close AI options" onClick={() => setOpen(false)}>
+                <RiCloseLine aria-hidden size={18} />
+              </button>
+            </span>
           </div>
           {notice && (
             <p className="inline-notice">
@@ -88,7 +134,7 @@ export function AiAssist({
           <OptionRow label="Length" options={["short", "medium", "long"]} value={length} onChange={setLength} />
           <input value={focus} onChange={(event) => setFocus(event.target.value)} placeholder="Mention mood, memory, prayer..." />
           <button className="ai-generate" type="button" disabled={isGenerating} onClick={() => void generate()}>
-            {isGenerating ? loveLoadingLines[loadingIndex] : "Generate"}
+            {isGenerating ? loveLoadingLines[loadingIndex] : `Generate ${period} messages`}
           </button>
           {suggestions.length > 0 && (
             <button className="clear-suggestions" type="button" onClick={() => setSuggestions([])}>
@@ -96,10 +142,21 @@ export function AiAssist({
             </button>
           )}
           <div className="suggestion-list compact">
-            {suggestions.map((message) => (
-              <button className="suggestion-option" key={message} type="button" onClick={() => { onUse(message); setOpen(false); }}>
-                {message}
-              </button>
+            {suggestions.map((suggestion) => (
+              <div className="suggestion-card" key={suggestion.id}>
+                <p>{suggestion.body}</p>
+                <div className="suggestion-actions">
+                  <button type="button" onClick={() => use(suggestion)}>Use</button>
+                  <button
+                    className={suggestion.saved ? "saved" : ""}
+                    type="button"
+                    disabled={suggestion.saved || suggestion.saving || suggestion.id <= 0}
+                    onClick={() => void saveToBank(suggestion)}
+                  >
+                    {suggestion.saved ? "Saved to bank" : suggestion.saving ? "Saving..." : "Save to bank"}
+                  </button>
+                </div>
+              </div>
             ))}
           </div>
         </div>

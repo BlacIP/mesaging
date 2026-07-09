@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { api, readBankCache, readableError, writeBankCache } from "@/components/shared/client-data";
+import { api, isCacheFresh, readBankCache, readableError, writeBankCache } from "@/components/shared/client-data";
 import { MobileActions } from "@/components/shared/mobile-actions";
 import { BankMessage } from "@/lib/types";
 import { FilterToolbar } from "./filter-toolbar";
@@ -24,6 +24,7 @@ export function BankPage() {
       setMessages(cached.messages);
       setConfig(cached.config);
       setNotice(`Showing ${cached.messages.length} active messages`);
+      if (isCacheFresh(cached)) return; // Refresh button forces a real fetch
     }
     void loadBank();
   }, []);

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { Viewport } from "next";
 import { Fraunces } from "next/font/google";
+import { KeyGate } from "@/components/shared/key-gate";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -35,7 +36,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={fraunces.variable}>
-      <body>{children}</body>
+      <body>
+        <KeyGate>{children}</KeyGate>
+      </body>
     </html>
   );
 }

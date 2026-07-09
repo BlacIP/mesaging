@@ -89,33 +89,120 @@
   overflow: auto;
 }
 
-.suggestion-option {
-  width: 100%;
-  min-height: auto;
-  border: 1px solid var(--border);
-  background: var(--surface-soft);
-  color: var(--text);
-  font-weight: 400;
-  line-height: 1.5;
-  margin-top: 0.5rem;
-  padding: 0.65rem;
-  text-align: left;
+.ai-head-title {
+  display: inline-flex;
+  gap: 0.5rem;
+  align-items: center;
 }
 
-.suggestion-option:hover {
-  border-color: var(--border-strong);
+.ai-head-actions {
+  display: inline-flex;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.ai-history-link {
+  color: var(--muted);
+  font-size: 0.82rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.ai-history-link:hover {
+  color: var(--accent);
+}
+
+.suggestion-card {
+  border: 1px solid var(--border);
+  border-radius: 7px;
   background: var(--surface-soft);
+  margin-top: 0.5rem;
+  padding: 0.65rem;
+}
+
+.suggestion-card p {
+  margin: 0 0 0.55rem;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.suggestion-card .suggestion-actions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.suggestion-card .suggestion-actions button {
+  min-height: 30px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.78rem;
+  font-weight: 500;
+  padding: 0 0.6rem;
+}
+
+.suggestion-card .suggestion-actions button:hover {
+  border-color: var(--text);
+  background: var(--surface);
+}
+
+.suggestion-card .suggestion-actions button.saved,
+.suggestion-card .suggestion-actions button.saved:disabled {
+  border-color: var(--border);
+  background: transparent;
+  color: var(--muted);
+  opacity: 1;
+}
+
+.ai-backdrop {
+  display: none;
 }
 
 @media (max-width: 860px) {
+  .ai-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 44;
+    display: block;
+    background: rgba(44, 36, 28, 0.32);
+    animation: sheet-fade 180ms ease-out;
+  }
+
   .ai-popover {
-    position: absolute;
-    top: 2.7rem;
-    right: -0.65rem;
-    left: auto;
-    width: min(340px, calc(100vw - 24px));
-    max-height: min(420px, calc(100dvh - 160px));
+    position: fixed;
+    top: auto;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 45;
+    width: 100%;
+    max-height: 78dvh;
     overflow: auto;
-    transform: none;
+    border: 0;
+    border-top: 1px solid var(--border);
+    border-radius: 16px 16px 0 0;
+    box-shadow: var(--shadow-pop);
+    padding: 0.9rem 1rem calc(1.1rem + env(safe-area-inset-bottom));
+    animation: sheet-rise 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .ai-popover::before {
+    display: block;
+    width: 42px;
+    height: 4px;
+    border-radius: 999px;
+    background: var(--border-strong);
+    content: "";
+    margin: 0 auto 0.8rem;
+  }
+
+  .suggestion-list.compact {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .suggestion-card .suggestion-actions button {
+    min-height: 40px;
+    flex: 1;
   }
 }

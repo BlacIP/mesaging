@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { AiProviderError, createAiMessages } from "@/lib/ai/messages";
 import { isAdminRequest, unauthorized } from "@/lib/auth";
-import { isPeriod } from "@/lib/db";
+import { isPeriod, recordGeneration } from "@/lib/db";
 
 export async function POST(request: NextRequest) {
   if (!isAdminRequest(request)) return unauthorized();
@@ -12,18 +12,34 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "A valid period and AI mode are required." }, { status: 400 });
   }
 
-  try {
-    const suggestions = await createAiMessages({
-      draft: typeof body.draft === "string" ? body.draft : "",
-      focus: typeof body.focus === "string" ? body.focus : "",
-      herName: typeof body.herName === "string" ? body.herName : "",
-      length: typeof body.length === "string" ? body.length : "medium",
-      mode: body.mode,
-      period: body.period,
-      tone: typeof body.tone === "string" ? body.tone : "romantic"
-    });
+  const params = {
+    draft: typeof body.draft === "string" ? body.draft : "",
+    focus: typeof body.focus === "string" ? body.focus : "",
+    herName: typeof body.herName === "string" ? body.herName : "",
+    length: typeof body.length === "string" ? body.length : "medium",
+    mode: body.mode as "generate" | "edit",
+    period: body.period,
+    tone: typeof body.tone === "string" ? body.tone : "romantic"
+  };
 
-    return NextResponse.json({ suggestions });
+  try {
+    const texts = await createAiMessages(params);
+
+    let generationId: number | null = null;
+    let suggestions = texts.map((text, index) => ({ id: -(index + 1), body: text }));
+    try {
+      const saved = await recordGeneration(
+        { period: params.period, mode: params.mode, tone: params.tone, length: params.length, focus: params.focus, draft: params.draft },
+        texts
+      );
+      generationId = saved.generationId;
+      suggestions = saved.suggestions;
+    } catch (error) {
+      // history persistence must never block showing fresh suggestions
+      console.error("[ai] failed to record generation history", error);
+    }
+
+    return NextResponse.json({ generationId, suggestions });
   } catch (error) {
     const status = error instanceof AiProviderError ? error.status : 500;
     const message = error instanceof Error ? error.message : "AI failed.";

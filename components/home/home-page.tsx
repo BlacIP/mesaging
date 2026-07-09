@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { api, readableError, writeBankCache } from "@/components/shared/client-data";
+import { api, isCacheFresh, readBankCache, readableError, writeBankCache } from "@/components/shared/client-data";
 import { InstallPrompt } from "@/components/shared/install-prompt";
 import { AppConfig, Message, Period, emptyConfig } from "@/lib/types";
 import { PreviewDialog } from "./dialogs";
@@ -21,6 +21,15 @@ export function HomePage() {
   const [notice, setNotice] = useState<string | null>(null);
 
   useEffect(() => {
+    // render from the session cache; only hit the server when there is no
+    // cache yet (first load of the session) or it has gone stale. Mutations
+    // keep the cache current, so tab hops cost zero network calls.
+    const cached = readBankCache();
+    if (cached) {
+      setMessages(cached.messages);
+      setConfig({ ...emptyConfig, ...cached.config });
+      if (isCacheFresh(cached)) return;
+    }
     void loadData();
   }, []);
 
@@ -39,8 +48,8 @@ export function HomePage() {
       writeBankCache(data.messages, nextConfig);
       setNotice(null);
     } catch (error) {
-      setMessages([]);
-      setConfig(emptyConfig);
+      // keep whatever is on screen (possibly cache-painted) — a failed
+      // background refresh should not blank the page
       setNotice(readableError(error));
     }
   }
@@ -132,6 +141,11 @@ export function HomePage() {
             title={period === "morning" ? "Good Morning" : "Good Night"}
             isAdding={addingPeriod === period}
             onAdd={add}
+            onBankUpdated={(nextMessages) => {
+              setMessages(nextMessages);
+              writeBankCache(nextMessages, config);
+              void refreshPreview(period);
+            }}
             onChange={(value) => setNewMessage((current) => ({ ...current, [period]: value }))}
             onPreview={(nextPeriod) => void previewNext(nextPeriod)}
           />

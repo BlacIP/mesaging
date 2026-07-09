@@ -2,32 +2,32 @@
 
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
-import { api, readableError, writeBankCache } from "@/components/shared/client-data";
+import { api, getStoredKey, readBankCache, readableError, writeBankCache } from "@/components/shared/client-data";
 import { CopyButton } from "@/components/shared/copy-button";
 import { InstallPrompt } from "@/components/shared/install-prompt";
 import { MobileActions } from "@/components/shared/mobile-actions";
 import { SettingsForm } from "@/components/home/settings-form";
 import { SettingsSavedDialog } from "@/components/home/dialogs";
-import { AppConfig, Message, emptyConfig } from "@/lib/types";
+import { AppConfig, emptyConfig } from "@/lib/types";
 
 export function SettingsPage() {
   const [config, setConfig] = useState<AppConfig>(emptyConfig);
-  const [messages, setMessages] = useState<Message[]>([]);
   const [editing, setEditing] = useState(false);
   const [saved, setSaved] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [baseUrl, setBaseUrl] = useState("");
+  const [shortcutKey, setShortcutKey] = useState("");
 
   useEffect(() => {
     setBaseUrl(window.location.origin);
+    setShortcutKey(getStoredKey() ?? "");
     void loadData();
   }, []);
 
   async function loadData() {
     try {
-      const data = await api<{ messages: Message[]; config: AppConfig }>("/api/data");
+      const data = await api<{ config: AppConfig }>("/api/config");
       setConfig({ ...emptyConfig, ...data.config });
-      setMessages(data.messages);
       setNotice(null);
     } catch (error) {
       setNotice(readableError(error));
@@ -42,7 +42,10 @@ export function SettingsPage() {
         body: JSON.stringify(config)
       });
       setConfig(data.config);
-      writeBankCache(messages, data.config);
+      // keep the bank page's instant-paint cache in sync without
+      // refetching the whole bank just for a config change
+      const cached = readBankCache();
+      if (cached) writeBankCache(cached.messages, data.config);
       setEditing(false);
       setSaved(true);
     } catch (error) {
@@ -73,19 +76,19 @@ export function SettingsPage() {
         onSave={saveSettings}
       />
       <InstallPrompt variant="settings" />
-      <ShortcutFlow baseUrl={baseUrl} />
+      <ShortcutFlow baseUrl={baseUrl} shortcutKey={shortcutKey} />
       {saved && <SettingsSavedDialog config={config} onClose={() => setSaved(false)} />}
     </main>
   );
 }
 
-function ShortcutFlow({ baseUrl }: { baseUrl: string }) {
+function ShortcutFlow({ baseUrl, shortcutKey }: { baseUrl: string; shortcutKey: string }) {
   return (
     <section className="panel flow-panel">
       <h2>Shortcut Flow</h2>
       <div className="shortcut-endpoints">
         {(["morning", "night"] as const).map((period) => {
-          const url = `${baseUrl}/api/next?period=${period}`;
+          const url = `${baseUrl}/api/next?period=${period}${shortcutKey ? `&key=${encodeURIComponent(shortcutKey)}` : ""}`;
           return (
             <label key={period}>
               {period} endpoint
@@ -99,7 +102,7 @@ function ShortcutFlow({ baseUrl }: { baseUrl: string }) {
       </div>
       <ol>
         <li>Create a Personal Automation for the morning or night time.</li>
-        <li>Use Get Contents of URL with the matching endpoint above.</li>
+        <li>Use Get Contents of URL with the matching endpoint above — the link includes your passcode so the Shortcut is allowed in.</li>
         <li>Use Get Dictionary from Input, then get the value for <span className="inline-code">message</span>.</li>
         <li>Use Send Message for iMessage, or Open URL with your WhatsApp deep link.</li>
         <li>Turn off Ask Before Running after you have tested it.</li>
