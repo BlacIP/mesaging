@@ -49,6 +49,16 @@ async function createSchema() {
   const sql = getSql();
 
   await sql`
+    create table if not exists accounts (
+      id bigserial primary key,
+      name text not null,
+      passcode_hash text not null unique,
+      is_admin boolean not null default false,
+      created_at timestamptz not null default now()
+    )
+  `;
+
+  await sql`
     create table if not exists messages (
       id bigserial primary key,
       period text not null check (period in ('morning', 'night')),
@@ -123,4 +133,23 @@ async function createSchema() {
     create index if not exists message_sends_message_id_idx
     on message_sends(message_id)
   `;
+
+  // ---- multi-account migration: add account_id to every data table.
+  // Existing rows are backfilled to the owner account in ensureAccountSystem.
+  await sql`alter table messages add column if not exists account_id bigint references accounts(id) on delete cascade`;
+  await sql`alter table message_sends add column if not exists account_id bigint references accounts(id) on delete cascade`;
+  await sql`alter table app_settings add column if not exists account_id bigint references accounts(id) on delete cascade`;
+  await sql`alter table forced_next_messages add column if not exists account_id bigint references accounts(id) on delete cascade`;
+  await sql`alter table ai_generations add column if not exists account_id bigint references accounts(id) on delete cascade`;
+
+  // settings and forced-next were keyed globally; they are now unique per account
+  await sql`alter table app_settings drop constraint if exists app_settings_pkey`;
+  await sql`create unique index if not exists app_settings_account_key_idx on app_settings(account_id, key)`;
+  await sql`alter table forced_next_messages drop constraint if exists forced_next_messages_pkey`;
+  await sql`create unique index if not exists forced_next_account_period_idx on forced_next_messages(account_id, period)`;
+
+  await sql`create index if not exists messages_account_idx on messages(account_id, period, active)`;
+
+  // space names are unique (case-insensitive) — they double as the recovery credential
+  await sql`create unique index if not exists accounts_name_unique_idx on accounts (lower(name))`;
 }

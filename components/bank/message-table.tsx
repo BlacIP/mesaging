@@ -2,18 +2,19 @@
 
 import { applyName } from "@/components/shared/client-data";
 import { BankMessage } from "@/lib/types";
-import { RiEdit2Line, RiExternalLinkLine, RiMore2Fill, RiSendPlaneLine } from "@remixicon/react";
+import { RiCloseCircleLine, RiEdit2Line, RiExternalLinkLine, RiMore2Fill, RiSendPlaneLine } from "@remixicon/react";
 import { useState } from "react";
 
 type Props = {
   herName: string;
   messages: BankMessage[];
+  onCancelForce: (message: BankMessage) => Promise<void> | void;
   onEdit: (message: BankMessage) => void;
   onForceNext: (message: BankMessage) => Promise<void> | void;
   onOpen: (message: BankMessage) => void;
 };
 
-export function MessageTable({ herName, messages, onEdit, onForceNext, onOpen }: Props) {
+export function MessageTable({ herName, messages, onCancelForce, onEdit, onForceNext, onOpen }: Props) {
   const [openMenu, setOpenMenu] = useState<number | null>(null);
 
   function runAction(message: BankMessage, action: (message: BankMessage) => Promise<void> | void) {
@@ -91,9 +92,15 @@ export function MessageTable({ herName, messages, onEdit, onForceNext, onOpen }:
             <button type="button" role="menuitem" onClick={() => runAction(message, onEdit)}>
               <span><RiEdit2Line aria-hidden size={17} /></span> Edit
             </button>
-            <button disabled={message.forced_next} type="button" role="menuitem" onClick={() => runAction(message, onForceNext)}>
-              <span><RiSendPlaneLine aria-hidden size={17} /></span> {message.forced_next ? "Already next" : "Send next"}
-            </button>
+            {message.forced_next ? (
+              <button type="button" role="menuitem" onClick={() => runAction(message, onCancelForce)}>
+                <span><RiCloseCircleLine aria-hidden size={17} /></span> Cancel send next
+              </button>
+            ) : (
+              <button type="button" role="menuitem" onClick={() => runAction(message, onForceNext)}>
+                <span><RiSendPlaneLine aria-hidden size={17} /></span> Send next
+              </button>
+            )}
           </div>
         )}
       </div>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
-import { api, getStoredKey, readBankCache, readableError, writeBankCache } from "@/components/shared/client-data";
+import { api, clearStoredKey, getStoredKey, readBankCache, readableError, setStoredKey, writeBankCache } from "@/components/shared/client-data";
 import { CopyButton } from "@/components/shared/copy-button";
 import { InstallPrompt } from "@/components/shared/install-prompt";
 import { MobileActions } from "@/components/shared/mobile-actions";
@@ -17,6 +17,8 @@ export function SettingsPage() {
   const [notice, setNotice] = useState<string | null>(null);
   const [baseUrl, setBaseUrl] = useState("");
   const [shortcutKey, setShortcutKey] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [accountName, setAccountName] = useState("");
 
   useEffect(() => {
     setBaseUrl(window.location.origin);
@@ -26,12 +28,19 @@ export function SettingsPage() {
 
   async function loadData() {
     try {
-      const data = await api<{ config: AppConfig }>("/api/config");
+      const data = await api<{ config: AppConfig; account?: { name: string; is_admin: boolean } }>("/api/config");
       setConfig({ ...emptyConfig, ...data.config });
+      setIsAdmin(Boolean(data.account?.is_admin));
+      setAccountName(data.account?.name ?? "");
       setNotice(null);
     } catch (error) {
       setNotice(readableError(error));
     }
+  }
+
+  function switchAccount() {
+    clearStoredKey();
+    window.location.href = "/"; // full reload so the passcode gate reappears
   }
 
   async function saveSettings(event: FormEvent<HTMLFormElement>) {
@@ -59,12 +68,25 @@ export function SettingsPage() {
         <div>
           <p className="kicker">Sweet Messages</p>
           <h1>Settings</h1>
-          <p>Private configuration for name replacement and future sender options.</p>
+          <p>
+            {accountName ? <>Your space: <strong>{accountName}</strong>. </> : null}
+            Private configuration for name replacement and future sender options.
+          </p>
         </div>
         <div className="hero-actions">
+          {isAdmin && <Link className="link-button" href="/admin">Accounts</Link>}
           <Link className="link-button" href="/">Manage messages</Link>
+          <button type="button" onClick={switchAccount}>
+            {isAdmin ? "Switch account" : "Sign out"}
+          </button>
         </div>
-        <MobileActions items={[{ href: "/", label: "Manage messages" }]} />
+        <MobileActions
+          items={[
+            ...(isAdmin ? [{ href: "/admin", label: "Accounts" }] : []),
+            { href: "/", label: "Manage messages" }
+          ]}
+          menuItems={[{ label: isAdmin ? "Switch account" : "Sign out", onClick: switchAccount }]}
+        />
       </section>
       {notice && <p className="notice" role="alert">{notice}</p>}
       <SettingsForm
@@ -76,9 +98,56 @@ export function SettingsPage() {
         onSave={saveSettings}
       />
       <InstallPrompt variant="settings" />
+      {!isAdmin && <PasscodePanel onChanged={(next) => setShortcutKey(next)} />}
       <ShortcutFlow baseUrl={baseUrl} shortcutKey={shortcutKey} />
       {saved && <SettingsSavedDialog config={config} onClose={() => setSaved(false)} />}
     </main>
+  );
+}
+
+function PasscodePanel({ onChanged }: { onChanged: (next: string) => void }) {
+  const [value, setValue] = useState("");
+  const [message, setMessage] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  async function change(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setBusy(true);
+    setMessage(null);
+    try {
+      await api("/api/account", {
+        method: "POST",
+        body: JSON.stringify({ action: "change_passcode", passcode: value })
+      });
+      setStoredKey(value); // this device stays signed in with the new passcode
+      onChanged(value.trim());
+      setValue("");
+      setMessage("Passcode changed. This device stays signed in — update your Shortcut link below.");
+    } catch (error) {
+      setMessage(readableError(error, "Could not change passcode"));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <form className="panel passcode-panel" onSubmit={change}>
+      <h2>Passcode</h2>
+      <p>Pick a new passcode for this space. Other devices will need the new one.</p>
+      <div className="passcode-row">
+        <input
+          type="password"
+          autoComplete="new-password"
+          value={value}
+          placeholder="New passcode (6+ characters)"
+          onChange={(event) => setValue(event.target.value)}
+        />
+        <button type="submit" disabled={busy || value.trim().length < 6}>
+          {busy ? "Changing..." : "Change passcode"}
+        </button>
+      </div>
+      {message && <p className="inline-notice">{message}</p>}
+    </form>
   );
 }
 

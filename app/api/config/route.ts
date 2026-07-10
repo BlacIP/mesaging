@@ -1,19 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isAdminRequest, unauthorized } from "@/lib/auth";
+import { getAccount, unauthorized } from "@/lib/auth";
 import { AppConfig, getConfig, saveConfig } from "@/lib/db";
 
 export async function GET(request: NextRequest) {
-  if (!isAdminRequest(request)) {
-    return unauthorized();
-  }
+  const account = await getAccount(request);
+  if (!account) return unauthorized();
 
-  return NextResponse.json({ config: await getConfig() });
+  return NextResponse.json({
+    config: await getConfig(account.id),
+    account: { name: account.name, is_admin: account.is_admin }
+  });
 }
 
 export async function POST(request: NextRequest) {
-  if (!isAdminRequest(request)) {
-    return unauthorized();
-  }
+  const account = await getAccount(request);
+  if (!account) return unauthorized();
 
   const body = await request.json();
   const config: AppConfig = {
@@ -26,7 +27,7 @@ export async function POST(request: NextRequest) {
     send_whatsapp: body.send_whatsapp !== false
   };
 
-  await saveConfig(config);
+  await saveConfig(account.id, config);
   return NextResponse.json({ config });
 }
 

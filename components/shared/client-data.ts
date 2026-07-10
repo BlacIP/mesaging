@@ -61,7 +61,18 @@ export function getStoredKey() {
 }
 
 export function setStoredKey(key: string) {
+  // switching accounts must not leak the previous account's cached bank
+  if (window.localStorage.getItem(appKeyStorage) !== key.trim()) clearBankCache();
   window.localStorage.setItem(appKeyStorage, key.trim());
+}
+
+export function clearBankCache() {
+  window.sessionStorage.removeItem(bankCacheKey);
+}
+
+export function clearStoredKey() {
+  window.localStorage.removeItem(appKeyStorage);
+  clearBankCache();
 }
 
 export function isUnauthorizedError(error: unknown) {

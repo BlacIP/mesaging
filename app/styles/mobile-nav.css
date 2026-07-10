@@ -22,14 +22,21 @@
   animation: sheet-rise 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.action-sheet::before {
+/* real drag handle: pull it down to dismiss the sheet */
+.sheet-handle {
+  padding: 0.15rem 0 0.7rem;
+  cursor: grab;
+  touch-action: none;
+}
+
+.sheet-handle::before {
   display: block;
   width: 42px;
   height: 4px;
   border-radius: 999px;
   background: var(--border-strong);
   content: "";
-  margin: 0 auto 0.8rem;
+  margin: 0 auto;
 }
 
 .action-sheet-heading {
@@ -67,6 +74,18 @@
   font-weight: 600;
   padding: 0 0.9rem;
   text-decoration: none;
+}
+
+.action-sheet-links .sheet-secondary {
+  border-style: dashed;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 500;
+  margin-top: 0.35rem;
+}
+
+.action-sheet-links .sheet-secondary:hover {
+  color: var(--accent);
 }
 
 @keyframes sheet-fade {

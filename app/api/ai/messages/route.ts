@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { AiProviderError, createAiMessages } from "@/lib/ai/messages";
-import { isAdminRequest, unauthorized } from "@/lib/auth";
+import { getAccount, unauthorized } from "@/lib/auth";
 import { isPeriod, recordGeneration } from "@/lib/db";
 
 export async function POST(request: NextRequest) {
-  if (!isAdminRequest(request)) return unauthorized();
+  const account = await getAccount(request);
+  if (!account) return unauthorized();
 
   const body = await request.json();
 
@@ -29,6 +30,7 @@ export async function POST(request: NextRequest) {
     let suggestions = texts.map((text, index) => ({ id: -(index + 1), body: text }));
     try {
       const saved = await recordGeneration(
+        account.id,
         { period: params.period, mode: params.mode, tone: params.tone, length: params.length, focus: params.focus, draft: params.draft },
         texts
       );

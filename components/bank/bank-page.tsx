@@ -17,6 +17,7 @@ export function BankPage() {
   const [status, setStatus] = useState<StatusFilter>("all");
   const [selected, setSelected] = useState<{ editing: boolean; message: BankMessage } | null>(null);
   const [notice, setNotice] = useState("Loading bank...");
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     const cached = readBankCache<BankCache>();
@@ -43,6 +44,7 @@ export function BankPage() {
   }), [messages]);
 
   async function loadBank() {
+    setRefreshing(true);
     try {
       const data = await api<{ messages: BankMessage[]; config: BankConfig }>("/api/bank");
       setMessages(data.messages);
@@ -51,6 +53,8 @@ export function BankPage() {
       setNotice(`Showing ${data.messages.length} active messages`);
     } catch (error) {
       setNotice(readableError(error, "Could not load bank"));
+    } finally {
+      setRefreshing(false);
     }
   }
 
@@ -85,14 +89,29 @@ export function BankPage() {
     }
   }
 
+  async function cancelForce(message: BankMessage) {
+    try {
+      const data = await api<{ messages: BankMessage[] }>("/api/messages", {
+        method: "POST",
+        body: JSON.stringify({ action: "cancel_force", id: message.id })
+      });
+      setMessages(data.messages);
+      writeBankCache(data.messages, config);
+      setNotice(`Cancelled — ${message.period} goes back to its normal queue`);
+    } catch (error) {
+      setNotice(readableError(error, "Could not cancel the forced message"));
+    }
+  }
+
   return (
     <main className="shell">
-      <Hero onRefresh={() => void loadBank()} />
+      <Hero refreshing={refreshing} onRefresh={() => void loadBank()} />
       {notice.startsWith("Could not") && <p className="notice" role="alert">{notice}</p>}
       <FilterToolbar counts={counts} period={period} status={status} onPeriod={setPeriod} onStatus={setStatus} />
       <MessageTable
         herName={config.her_name}
         messages={filtered}
+        onCancelForce={cancelForce}
         onEdit={(message) => setSelected({ editing: true, message })}
         onForceNext={forceNext}
         onOpen={(message) => setSelected({ editing: false, message })}
@@ -110,7 +129,7 @@ export function BankPage() {
   );
 }
 
-function Hero({ onRefresh }: { onRefresh: () => void }) {
+function Hero({ refreshing, onRefresh }: { refreshing: boolean; onRefresh: () => void }) {
   return (
     <section className="hero bank-hero">
       <div>
@@ -119,9 +138,18 @@ function Hero({ onRefresh }: { onRefresh: () => void }) {
       </div>
       <div className="hero-actions">
         <Link className="link-button" href="/">Manage messages</Link>
-        <button type="button" onClick={onRefresh}>Refresh</button>
+        <Link className="link-button" href="/settings">Settings</Link>
+        <button type="button" disabled={refreshing} onClick={onRefresh}>
+          {refreshing ? "Refreshing..." : "Refresh"}
+        </button>
       </div>
-      <MobileActions items={[{ href: "/", label: "Manage messages" }, { label: "Refresh", onClick: onRefresh }]} />
+      <MobileActions
+        items={[
+          { href: "/", label: "Manage messages" },
+          { label: refreshing ? "Refreshing..." : "Refresh", onClick: onRefresh },
+          { href: "/settings", label: "Settings", menuOnly: true }
+        ]}
+      />
     </section>
   );
 }

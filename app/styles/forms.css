@@ -60,6 +60,29 @@
   margin-top: 18px;
 }
 
+.passcode-panel {
+  margin-top: 18px;
+}
+
+.passcode-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.passcode-panel .inline-notice {
+  display: block;
+  margin: 0.75rem 0 0;
+}
+
+@media (max-width: 860px) {
+  .passcode-row {
+    grid-template-columns: 1fr;
+  }
+}
+
 .ai-controls {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 180px));

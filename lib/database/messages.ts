@@ -1,20 +1,21 @@
 import { BankMessage, Message, Period } from "@/lib/types";
 import { ensureSchema, getSql, traceDb } from "./client";
 
-export async function listMessages() {
+export async function listMessages(accountId: number) {
   await ensureSchema();
   const sql = getSql();
   const rows = await traceDb("messages.list", () => sql`
     select id, period, body, active, created_at
     from messages
     where active = true
+      and account_id = ${accountId}
     order by period, created_at desc, id desc
   `);
 
   return rows as Message[];
 }
 
-export async function listBankMessages() {
+export async function listBankMessages(accountId: number) {
   await ensureSchema();
   const sql = getSql();
   const rows = await traceDb("messages.bank", () => sql`
@@ -33,13 +34,14 @@ export async function listBankMessages() {
         select f.message_id as id
         from forced_next_messages f
         join messages m on m.id = f.message_id
-        where f.period = p.period and m.active = true
+        where f.period = p.period and f.account_id = ${accountId} and m.active = true
         limit 1
       ) forced on true
       left join lateral (
         select id
         from messages m
         where m.period = p.period
+          and m.account_id = ${accountId}
           and m.active = true
           and not exists (select 1 from message_sends s where s.message_id = m.id)
         order by m.created_at asc, m.id asc
@@ -48,7 +50,7 @@ export async function listBankMessages() {
       left join lateral (
         select id
         from messages m
-        where m.period = p.period and m.active = true
+        where m.period = p.period and m.account_id = ${accountId} and m.active = true
         order by m.created_at asc, m.id asc
         limit 1
       ) cycle on true
@@ -69,6 +71,7 @@ export async function listBankMessages() {
     left join forced_next_messages f on f.message_id = m.id and f.period = m.period
     left join next_by_period n on n.message_id = m.id and n.period = m.period
     where m.active = true
+      and m.account_id = ${accountId}
     group by m.id, m.period, m.body, m.active, m.created_at, f.message_id, n.message_id, n.reason
     order by m.period, m.created_at desc, m.id desc
   `);
@@ -79,32 +82,34 @@ export async function listBankMessages() {
   }));
 }
 
-export async function addMessage(period: Period, body: string) {
+export async function addMessage(accountId: number, period: Period, body: string) {
   await ensureSchema();
   const rows = await traceDb("messages.add", () => getSql()`
-    insert into messages (period, body)
-    values (${period}, ${body})
+    insert into messages (account_id, period, body)
+    values (${accountId}, ${period}, ${body})
     returning id, period, body, active, created_at
   `);
 
   return (rows as Message[])[0];
 }
 
-export async function deleteMessage(id: number) {
+export async function deleteMessage(accountId: number, id: number) {
   await ensureSchema();
   await traceDb("messages.delete", () => getSql()`
     update messages
     set active = false
     where id = ${id}
+      and account_id = ${accountId}
   `);
 }
 
-export async function updateMessage(id: number, body: string) {
+export async function updateMessage(accountId: number, id: number, body: string) {
   await ensureSchema();
   const rows = await traceDb("messages.update", () => getSql()`
     update messages
     set body = ${body}
     where id = ${id}
+      and account_id = ${accountId}
       and active = true
     returning id, period, body, active, created_at
   `);

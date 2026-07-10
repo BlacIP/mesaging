@@ -46,3 +46,20 @@
   color: var(--accent-strong);
   font-size: 0.88rem;
 }
+
+.gate-switch {
+  min-height: 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 500;
+  padding: 0.2rem 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.gate-switch:hover {
+  background: transparent;
+  color: var(--accent);
+}

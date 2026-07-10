@@ -95,20 +95,25 @@
   align-items: center;
 }
 
-.ai-head-actions {
-  display: inline-flex;
-  gap: 0.6rem;
+.ai-popover .sheet-handle {
+  display: none; /* desktop popover is not a sheet — no drag handle */
+}
+
+.ai-history-footer {
+  display: flex;
+  gap: 0.4rem;
   align-items: center;
-}
-
-.ai-history-link {
+  justify-content: center;
+  border-top: 1px solid var(--border);
   color: var(--muted);
-  font-size: 0.82rem;
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  font-size: 0.84rem;
+  font-weight: 500;
+  margin-top: 0.75rem;
+  padding: 0.7rem 0 0.1rem;
+  text-decoration: none;
 }
 
-.ai-history-link:hover {
+.ai-history-footer:hover {
   color: var(--accent);
 }
 
@@ -186,14 +191,8 @@
     animation: sheet-rise 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
   }
 
-  .ai-popover::before {
+  .ai-popover .sheet-handle {
     display: block;
-    width: 42px;
-    height: 4px;
-    border-radius: 999px;
-    background: var(--border-strong);
-    content: "";
-    margin: 0 auto 0.8rem;
   }
 
   .suggestion-list.compact {

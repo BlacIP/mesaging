@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { api, formatPeriod, readableError } from "@/components/shared/client-data";
 import { Message, Period } from "@/lib/types";
-import { RiAiGenerate, RiCloseLine } from "@remixicon/react";
+import { RiAiGenerate, RiCloseLine, RiHistoryLine } from "@remixicon/react";
 import { useEffect, useState } from "react";
+import { useSheetDrag } from "./use-sheet-drag";
 
 const loveLoadingLines = [
   "building love...",
@@ -45,6 +46,7 @@ export function AiAssist({
   const [loadingIndex, setLoadingIndex] = useState(0);
   const [notice, setNotice] = useState<string | null>(null);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const { sheetRef, handleProps } = useSheetDrag(() => setOpen(false));
 
   useEffect(() => {
     if (!isGenerating) return;
@@ -111,18 +113,16 @@ export function AiAssist({
       </button>
       {open && <div className="ai-backdrop" role="presentation" onClick={() => setOpen(false)} />}
       {open && (
-        <div className="ai-popover" role="dialog" aria-label="AI assist options">
+        <div className="ai-popover" role="dialog" aria-label="AI assist options" ref={sheetRef}>
+          <div className="sheet-handle" aria-hidden {...handleProps} />
           <div className="ai-popover-head">
             <span className="ai-head-title">
               <strong>AI assist</strong>
               <span className={`period-pill ${period}`}>{formatPeriod(period)}</span>
             </span>
-            <span className="ai-head-actions">
-              <Link className="ai-history-link" href="/history">History</Link>
-              <button type="button" aria-label="Close AI options" onClick={() => setOpen(false)}>
-                <RiCloseLine aria-hidden size={18} />
-              </button>
-            </span>
+            <button type="button" aria-label="Close AI options" onClick={() => setOpen(false)}>
+              <RiCloseLine aria-hidden size={18} />
+            </button>
           </div>
           {notice && (
             <p className="inline-notice">
@@ -159,6 +159,9 @@ export function AiAssist({
               </div>
             ))}
           </div>
+          <Link className="ai-history-footer" href="/history" onClick={() => setOpen(false)}>
+            <RiHistoryLine aria-hidden size={16} /> View prompt history
+          </Link>
         </div>
       )}
     </span>

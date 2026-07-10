@@ -4,15 +4,19 @@ import { RiArchiveDrawerLine, RiCloseLine, RiEdit2Line, RiMenuLine, RiRefreshLin
 import Link from "next/link";
 import { ReactNode } from "react";
 import { useState } from "react";
+import { useSheetDrag } from "./use-sheet-drag";
 
 type ActionItem = {
   href?: string;
   label: string;
+  menuOnly?: boolean; // shown in the Menu sheet but not in the bottom tab bar
   onClick?: () => void;
 };
 
-export function MobileActions({ items }: { items: ActionItem[] }) {
+export function MobileActions({ items, menuItems = [] }: { items: ActionItem[]; menuItems?: ActionItem[] }) {
   const [open, setOpen] = useState(false);
+  const barItems = items.filter((item) => !item.menuOnly);
+  const { sheetRef, handleProps } = useSheetDrag<HTMLElement>(() => setOpen(false));
 
   function run(action?: () => void) {
     setOpen(false);
@@ -22,7 +26,7 @@ export function MobileActions({ items }: { items: ActionItem[] }) {
   return (
     <>
       <nav className="mobile-action-bar" aria-label="Mobile page actions">
-        {items.map((item) => item.href ? (
+        {barItems.map((item) => item.href ? (
           <Link className="mobile-action-item" key={item.label} href={item.href}>
             <span>{iconFor(item.label)}</span>
             <small>{item.label}</small>
@@ -40,7 +44,8 @@ export function MobileActions({ items }: { items: ActionItem[] }) {
       </nav>
       {open && (
         <div className="action-sheet-backdrop" role="presentation" onClick={() => setOpen(false)}>
-          <aside className="action-sheet" aria-label="Page actions" onClick={(event) => event.stopPropagation()}>
+          <aside className="action-sheet" aria-label="Page actions" ref={sheetRef} onClick={(event) => event.stopPropagation()}>
+            <div className="sheet-handle" aria-hidden {...handleProps} />
             <div className="action-sheet-heading">
               <strong>Actions</strong>
               <button type="button" aria-label="Close actions" onClick={() => setOpen(false)}>
@@ -52,6 +57,11 @@ export function MobileActions({ items }: { items: ActionItem[] }) {
                 <Link key={item.label} href={item.href} onClick={() => setOpen(false)}>{item.label}</Link>
               ) : (
                 <button key={item.label} type="button" onClick={() => run(item.onClick)}>{item.label}</button>
+              ))}
+              {menuItems.map((item) => (
+                <button className="sheet-secondary" key={item.label} type="button" onClick={() => run(item.onClick)}>
+                  {item.label}
+                </button>
               ))}
             </nav>
           </aside>

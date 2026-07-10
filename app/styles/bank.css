@@ -63,6 +63,18 @@
   min-width: 980px;
 }
 
+.admin-table {
+  min-width: 720px;
+}
+
+/* the bank page hides .table-wrap on mobile in favour of cards; the admin
+   table has no card variant, so keep it visible and let it scroll sideways */
+@media (max-width: 860px) {
+  .table-wrap.admin-table-wrap {
+    display: block;
+  }
+}
+
 .bank-table th,
 .bank-table td {
   border-bottom: 1px solid var(--border);

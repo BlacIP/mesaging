@@ -90,8 +90,15 @@ export function HistoryPage() {
         <div className="hero-actions">
           <Link className="link-button" href="/">Manage messages</Link>
           <Link className="link-button" href="/bank">View bank table</Link>
+          <Link className="link-button" href="/settings">Settings</Link>
         </div>
-        <MobileActions items={[{ href: "/", label: "Manage messages" }, { href: "/bank", label: "View bank table" }]} />
+        <MobileActions
+          items={[
+            { href: "/", label: "Manage messages" },
+            { href: "/bank", label: "View bank table" },
+            { href: "/settings", label: "Settings", menuOnly: true }
+          ]}
+        />
       </section>
 
       {notice && <p className="notice" role="alert">{notice}</p>}

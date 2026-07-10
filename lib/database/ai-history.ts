@@ -22,6 +22,7 @@ export type AiGenerationRecord = {
 };
 
 export async function recordGeneration(
+  accountId: number,
   params: { period: Period; mode: string; tone: string; length: string; focus: string; draft: string },
   suggestions: string[]
 ) {
@@ -29,8 +30,8 @@ export async function recordGeneration(
   const sql = getSql();
 
   const [generation] = (await sql`
-    insert into ai_generations (period, mode, tone, length, focus, draft)
-    values (${params.period}, ${params.mode}, ${params.tone}, ${params.length}, ${params.focus}, ${params.draft})
+    insert into ai_generations (account_id, period, mode, tone, length, focus, draft)
+    values (${accountId}, ${params.period}, ${params.mode}, ${params.tone}, ${params.length}, ${params.focus}, ${params.draft})
     returning id
   `) as { id: number }[];
 
@@ -47,7 +48,7 @@ export async function recordGeneration(
   return { generationId: generation.id, suggestions: saved };
 }
 
-export async function listGenerations(limit = 100) {
+export async function listGenerations(accountId: number, limit = 100) {
   await ensureSchema();
   const sql = getSql();
 
@@ -70,7 +71,9 @@ export async function listGenerations(limit = 100) {
     left join ai_suggestions s on s.generation_id = g.id
     left join messages m on m.id = s.added_message_id
     where g.id in (
-      select id from ai_generations order by id desc limit ${limit}
+      select id from ai_generations
+      where account_id = ${accountId}
+      order by id desc limit ${limit}
     )
     order by g.id desc, s.position asc, s.id asc
   `) as Array<{
@@ -120,7 +123,7 @@ export async function listGenerations(limit = 100) {
   return Array.from(generations.values());
 }
 
-export async function getSuggestion(id: number) {
+export async function getSuggestion(accountId: number, id: number) {
   await ensureSchema();
   const rows = (await getSql()`
     select s.id, s.body, s.added_message_id, g.period, coalesce(m.active, false) as in_bank
@@ -128,17 +131,26 @@ export async function getSuggestion(id: number) {
     join ai_generations g on g.id = s.generation_id
     left join messages m on m.id = s.added_message_id
     where s.id = ${id}
+      and g.account_id = ${accountId}
   `) as Array<{ id: number; body: string; added_message_id: number | null; period: Period; in_bank: boolean }>;
 
   return rows[0] ?? null;
 }
 
-export async function markSuggestionUsed(id: number) {
+export async function markSuggestionUsed(accountId: number, id: number) {
   await ensureSchema();
-  await getSql()`update ai_suggestions set used = true where id = ${id}`;
+  await getSql()`
+    update ai_suggestions set used = true
+    where id = ${id}
+      and generation_id in (select id from ai_generations where account_id = ${accountId})
+  `;
 }
 
-export async function linkSuggestionToMessage(id: number, messageId: number) {
+export async function linkSuggestionToMessage(accountId: number, id: number, messageId: number) {
   await ensureSchema();
-  await getSql()`update ai_suggestions set added_message_id = ${messageId} where id = ${id}`;
+  await getSql()`
+    update ai_suggestions set added_message_id = ${messageId}
+    where id = ${id}
+      and generation_id in (select id from ai_generations where account_id = ${accountId})
+  `;
 }

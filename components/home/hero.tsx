@@ -14,7 +14,7 @@ export function Hero({ total }: { total: number }) {
         <Link className="link-button" href="/history">Prompt history</Link>
         <Link className="link-button" href="/settings">Settings</Link>
       </div>
-      <MobileActions items={[{ href: "/bank", label: "View bank table" }, { href: "/history", label: "Prompt history" }, { href: "/settings", label: "Settings" }]} />
+      <MobileActions items={[{ href: "/bank", label: "View bank table" }, { href: "/history", label: "Prompt history" }, { href: "/settings", label: "Settings", menuOnly: true }]} />
     </section>
   );
 }
